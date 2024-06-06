@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase_version9_RealtimeDB(G'sACADEMY初学者用サンプル)</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <h1>チャットアプリ</h1>
+    <!-- コンテンツ表示画面 -->
+    <div>
+        <!-- 各場所にidを設定しましょう -->
+        <div >
+            <input id="uname" type="text" placeholder="名前を入力してください">
+        </div>
+        <div >
+            <textarea id="text" placeholder="文章を入力してください"></textarea>
+        </div>
+        <button id="send">送信</button>
+        <!-- style.cssに "overflow: auto;"を書いてみましょう！※最後に -->
+        <div  id="output"></div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+
+        //「firebase-database.js」を読み込みRealtimeDatabaseを使えるようにし、importで必要な機能を利用できるようにします！
+            import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+            from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        //ここまで
+           
+           
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
+        };
+                const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app); //RealtimeDBに接続
+        const dbRef = ref(db, "chat"); //RealtimeDB内の"chat"を使う
+
+        //データ登録(Click)
+        $("#send").on(`click`,function(){
+            const uname = $("#uname").val();
+            const text = $("#text").val();
+
+            // 表示の確認をする
+            console.log(uname,`名前`)
+            console.log(text,`テキスト`)
+
+
+            //塊をつくる
+            const msg = {
+                uname:$("#uname").val(),
+                text:$("#text").val(),
+            }
+            //firebaseに送る準備をする
+            const newPostRef = push(dbRef)
+            //送りたいデータをsetで指定する
+            set(newPostRef,msg)
+
+            //送信後内容を消す
+            $("#uname").val("");
+            $("#text").val("");
+        //送信
+
+
+//この下を消さない
+
+
+
+
+});
+        //データ登録(Enter)
+
+        //最初にデータ取得＆onSnapshotでリアルタイムにデータを取得 firebaseならではの記入 dbref成功したらおまじない dataは箱名
+        onChildAdded(dbRef,function(data){
+            const msg = data.val();
+            console.log(msg,"データの中身")
+            const key = data.key;
+            console.log(key,"鍵の名前")
+            //htmlとしてよみこみたいのでテンプレートリテラルを使います（es6）
+            let html = `
+                <div class="msg">
+                <p>${msg.uname}</p>
+                <p>${msg.text}</p>
+            </div>
+            `
+            $("#output").append(html);
+
+        })
+    </script>
+</body>
+
+</html>
